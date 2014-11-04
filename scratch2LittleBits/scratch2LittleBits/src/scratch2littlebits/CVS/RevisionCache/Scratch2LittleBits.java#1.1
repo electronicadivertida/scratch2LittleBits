@@ -1,0 +1,51 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package scratch2littlebits;
+
+import java.io.IOException;
+import javax.swing.JFrame;
+
+/**
+ *
+ * @author eduardo
+ */
+public class Scratch2LittleBits extends JFrame {
+
+
+
+    private ScratchArduino moArduino;
+    private ScratchHttp moHTTP;
+    private Thread moThrHTTP;
+
+    public Scratch2LittleBits() {
+    }
+
+    public void conectarHTTP() throws IOException {
+        moHTTP = new ScratchHttp(this);
+        moThrHTTP = new Thread(moHTTP);
+        moThrHTTP.start();
+
+        conectarArduino("/dev/ttyACM0");
+    }
+
+    public void conectarArduino(String psPuerto) throws IOException {
+        if(moArduino!=null){
+            moArduino.close();
+        }
+        moArduino = new ScratchArduino(psPuerto);
+    }
+    public ScratchArduino getArduino(){
+        return moArduino;
+    } 
+
+    public static void main(String[] args) throws IOException {
+        Scratch2LittleBits lo = new Scratch2LittleBits();
+        lo.conectarHTTP();
+        lo.setVisible(true);
+
+    }
+
+}

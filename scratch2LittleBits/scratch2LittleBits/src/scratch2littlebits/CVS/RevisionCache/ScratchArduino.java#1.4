@@ -1,0 +1,321 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package scratch2littlebits;
+
+import gnu.io.CommPort;
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author eduardo
+ */
+public class ScratchArduino {
+
+    public static final int INPUT = 0;
+    public static final int OUTPUT = 1;
+    public static final int ANALOG = 2;
+    public static final int PWM = 3;
+    public static final int SERVO = 4;
+    public static final int SHIFT = 5;
+    public static final int I2C = 6;
+    public static final int LOW = 0;
+    public static final int HIGH = 1;
+    public static final int READ_PINS = 1;
+    public static final int WRITE_ANALOG = 2;
+    public static final int WRITE_DIGITAL = 3;
+    public static final String mcsHIGH="true";
+    public static final String mcsLOW="false";
+    private String msPuerto;
+
+
+    
+
+    public static class InputVals {
+
+        int d0 = 0;
+        int a0 = 0;
+        int a1 = 0;
+    }
+
+    public static class OutputPins {
+
+        int d1 = 1;
+        int d5 = 5;
+        int d9 = 9;
+
+    }    
+    
+    private SerialPort serialPort;
+
+    private int sendAttempts = 0;
+    private int[] rawData = null;
+    private int[] pingCmd = new int[]{1};
+    private boolean connected = false;
+    private int mlIntentos = 2000;
+    private Timer moTimer;
+    
+    private InputVals inputVals = new InputVals();
+    private OutputPins outputPins = new OutputPins();
+    
+    
+
+    public ScratchArduino(String PuertoIdent) throws IOException {
+        try {
+            msPuerto = PuertoIdent;
+            
+            moTimer = new Timer();
+            moTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+
+                        if (sendAttempts >= 10) {
+                            try{
+                                Thread.sleep(2000);
+                            }catch(Exception e){}
+                            closePort();
+                            openPort();
+                        }
+
+                        sendAttempts++;
+                        write(pingCmd);
+
+                    } catch (Throwable ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }, 50, 50);
+            openPort();
+        } catch (Throwable e) {
+            System.out.println(e);
+            return;
+        }
+    }
+    
+    public synchronized void openPort() throws Exception{
+        CommPortIdentifier portIdentifier;
+        try{
+            portIdentifier = CommPortIdentifier.getPortIdentifier(msPuerto);
+        }catch(Throwable e){
+            e.printStackTrace();
+            portIdentifier = (CommPortIdentifier) CommPortIdentifier.getPortIdentifiers().nextElement();
+        }
+        
+        mlIntentos++;
+        CommPort commPort = portIdentifier.open("little"+String.valueOf(mlIntentos), mlIntentos);
+
+        if (commPort instanceof SerialPort) {
+            serialPort = (SerialPort) commPort;
+            serialPort.setSerialPortParams(38400, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+            serialPort.addEventListener(new SerialPortEventListener() {
+                public void serialEvent(SerialPortEvent e) {
+                    try {
+                        while (serialPort.getInputStream().available() > 0) {
+                            int n = serialPort.getInputStream().read();
+
+                            sendAttempts = 0;
+
+                            if (rawData == null || rawData.length == 3) {
+                                rawData = new int[]{n};
+                            } else {
+                                rawData = appendBuffer(rawData, n);
+                            }
+
+                            if (rawData.length >= 3) {
+                                processData();
+                            }
+
+                        }
+                    } catch (Throwable err) {
+                        err.printStackTrace();
+                    }
+                }
+            });
+            serialPort.notifyOnDataAvailable(true);
+
+            try {
+                Thread.sleep(3000); // let bootloader timeout
+            } catch (InterruptedException e) {
+            }
+            connected = true;
+
+        } else {
+            throw new Exception("Error: Only serial ports are handled by this example.");
+            
+        }
+
+
+    }
+    public synchronized void closePort() {
+        connected = false;
+        rawData=null;
+        if (serialPort != null) {
+            serialPort.close();
+            serialPort = null;
+        }        
+    }
+
+    public synchronized void close() {
+        closePort();
+        if (moTimer != null) {
+            moTimer.cancel();
+            moTimer = null;
+        }
+    }
+
+    private void processData() {
+        inputVals.d0 = rawData[0];
+        inputVals.a0 = rawData[1];
+        inputVals.a1 = rawData[2];
+        rawData = null;
+    }
+    
+    private int[] appendBuffer(int[] buffer1, int buffer2) {
+        int[] tmp = new int[buffer1.length + 1];
+        System.arraycopy(buffer1, 0, tmp, 0, buffer1.length);
+        tmp[buffer1.length] = buffer2;
+        return tmp;
+    }
+
+    public void write(int[] b) throws Exception {
+        for(int i = 0; i < b.length && connected; i++){
+            serialPort.getOutputStream().write(b[i]);
+        }
+    }
+
+    public int analogRead(int pin) {
+        int lResult = 0;
+        switch (pin) {
+            case 0:
+                lResult = inputVals.d0;
+                break;
+            case 1:
+                lResult = inputVals.a0;
+                break;
+            case 2:
+                lResult = inputVals.a1;
+                break;
+        }
+        return lResult;
+    }
+
+    public boolean digitalRead(int pin) {
+        if (analogRead(pin) > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public void analogWrite(int pin, int val) throws Exception {
+        int[] output = new int[3];
+        output[0] = 2;
+        switch (pin) {
+            case 0:
+                output[1] = outputPins.d1;
+                break;
+            case 1:
+                output[1] = outputPins.d5;
+                break;
+            case 2:
+                output[1] = outputPins.d9;
+                break;
+        }
+        output[2] = val;
+        write(output);
+    }
+    public void analogWrite(String pin, int val) throws Exception {
+        if(pin.equalsIgnoreCase("d1")){
+            analogWrite(0, val);
+        }else if(pin.equalsIgnoreCase("d5")){
+            analogWrite(1, val);
+        }else if(pin.equalsIgnoreCase("d9")){
+            analogWrite(2, val);
+        }
+    }
+    public void digitalWrite(String pin, String val) throws Exception {
+        if(pin.equalsIgnoreCase("d1")){
+            digitalWrite(0, val);
+        }else if(pin.equalsIgnoreCase("d5")){
+            digitalWrite(1, val);
+        }else if(pin.equalsIgnoreCase("d9")){
+            digitalWrite(2, val);
+        }
+    }
+
+    public void digitalWrite(int pin, String val) throws Exception {
+        int[] output = new int[3];
+        output[0] = 3;
+
+        switch (pin) {
+            case 0:
+                output[1] = outputPins.d1;
+                break;
+            case 1:
+                output[1] = outputPins.d5;
+                break;
+            case 2:
+                output[1] = outputPins.d9;
+                break;
+        }
+        if (val.equals(mcsHIGH)) {
+            output[2] = 1;
+        } else {
+            output[2] = 0;
+        }
+        write(output);
+    }
+
+    public boolean whenAnalogRead(int pin, char op, int val) {
+        if (op == '>') {
+            return analogRead(pin) > val;
+        } else if (op == '<') {
+            return analogRead(pin) < val;
+        } else if (op == '=') {
+            return analogRead(pin) == val;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean whenDigitalRead(int pin, String val) {
+        if (val.equalsIgnoreCase("HIGH")) {
+            return digitalRead(pin);
+        } else {
+            return digitalRead(pin) == false;
+        }
+    }
+    public InputVals getInputVals(){
+        return inputVals;
+    }
+    public OutputPins getOutputPins(){
+        return outputPins;
+    }
+    public void resetAll() throws Exception {
+//        analogWrite(1, 100);
+//        analogWrite(2, 0);
+//        digitalWrite(0, mcsLOW);
+//        inputVals.a0=0;
+//        inputVals.a1=0;
+//        inputVals.d0=0;
+        
+    }
+    /**
+     * @return the connected
+     */
+    public synchronized boolean isConnected() {
+        return connected;
+    }
+    
+}
