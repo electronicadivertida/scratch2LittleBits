@@ -6,8 +6,6 @@
 package scratch2littlebits;
 
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 import jssc.SerialPort;
@@ -22,27 +20,10 @@ import jssc.SerialPortList;
  */
 public class ScratchArduino {
 
-    public static final int INPUT = 0;
-    public static final int OUTPUT = 1;
-    public static final int ANALOG = 2;
-    public static final int PWM = 3;
-    public static final int SERVO = 4;
-    public static final int SHIFT = 5;
-    public static final int I2C = 6;
-    public static final int LOW = 0;
-    public static final int HIGH = 1;
-    public static final int READ_PINS = 1;
-    public static final int WRITE_ANALOG = 2;
-    public static final int WRITE_DIGITAL = 3;
     public static final String mcsHIGH="true";
     public static final String mcsLOW="false";
     private String msPuerto;
     private SerialPort serialPort;
-//    private CommPortIdentifier portIdentifier=null;
-//    private OutputStream out;
-
-    
-
     
 
     public static class InputVals {
