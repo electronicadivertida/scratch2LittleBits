@@ -24,6 +24,10 @@ public class ScratchHttp implements Runnable{
     private OutputStream sockOut;
     private final Scratch2LittleBits moControl;
     private boolean mbconectado=false;
+    
+//    private String msWhenDigital="";
+//    private String msWhenAnalog="";
+//    
 
     public ScratchHttp(Scratch2LittleBits poControl){
         moControl=poControl;
@@ -131,6 +135,8 @@ public class ScratchHttp implements Runnable{
                             + "analogRead/a0 " + String.valueOf((int)moControl.getArduino().getInputVals().a0) + Character.toString((char)10)
                             + "analogRead/a1 " + String.valueOf((int)moControl.getArduino().getInputVals().a1) + Character.toString((char)10)
                             + "digitalRead/d0 " + (moControl.getArduino().getInputVals().d0!=0?"true":"false") + Character.toString((char)10)
+//                            + msWhenDigital
+//                            + msWhenAnalog
                     );
 //                    if(moControl.getArduino().getInputVals().d0!=0){
 //                        String ls=String.valueOf(moControl.getArduino().getInputVals().d0);
@@ -145,6 +151,34 @@ public class ScratchHttp implements Runnable{
                         moControl.getArduino().digitalWrite(las[1], las[2]);
                     }else if(las[0].equalsIgnoreCase("analogWrite")){
                         moControl.getArduino().analogWrite(las[1], Double.valueOf(las[2]).intValue());
+//                    }else if(las[0].equalsIgnoreCase("whenDigitalRead")){
+//                        //no va
+//                        msWhenDigital=header + " " + (moControl.getArduino().getInputVals().d0!=0?"true":"false") +"\n";// + Character.toString((char)10);
+////                        msWhenDigital="_result" + " " + (moControl.getArduino().getInputVals().d0!=0?"true":"false") +"\n";// + Character.toString((char)10);
+//                        sendResponse(msWhenDigital);
+//                    }else if(las[0].equalsIgnoreCase("whenAnalogRead")){
+//                        //no va
+//                        char op = las[2].charAt(0);
+//                        if( "%3D".equalsIgnoreCase(las[2]) ){
+//                            op = '=';
+//                        } else if( "%3C".equalsIgnoreCase(las[2]) ){
+//                            op = '<';
+//                        } else if( "%3E".equalsIgnoreCase(las[2]) ){
+//                            op = '>';
+//                        }
+//                        double val = Double.valueOf(las[3]).doubleValue();
+//                        boolean lbR = false;    
+//                        if (op == '>'){
+//                          lbR = moControl.getArduino().analogRead(las[1]) > val;
+//                        }else if (op == '<'){
+//                          lbR = moControl.getArduino().analogRead(las[1]) < val;
+//                        }else if (op == '='){
+//                          lbR = moControl.getArduino().analogRead(las[1]) == val;
+//                        }
+//                        
+//                        msWhenAnalog=header + " " + (lbR?"true":"false")  + Character.toString((char)10);
+//                        //"whenAnalogRead/"+las[1] + "/"+ op + "/" + las[3]
+//                        sendResponse(msWhenAnalog);
                     } else{
                         System.out.println("Comando no procesado: " + header);
                     }

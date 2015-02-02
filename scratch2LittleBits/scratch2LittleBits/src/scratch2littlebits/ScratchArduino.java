@@ -220,6 +220,16 @@ public class ScratchArduino {
         return lResult;
     }
 
+    public int analogRead(String pspin) {
+        if(pspin.equalsIgnoreCase("d0")){
+            return analogRead(0);
+        } else if(pspin.equalsIgnoreCase("a0")){
+            return analogRead(1);
+        } else {
+            return analogRead(2);
+        }
+    }
+
     public boolean digitalRead(int pin) {
         if (analogRead(pin) > 0) {
             return true;
