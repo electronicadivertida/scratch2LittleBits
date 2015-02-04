@@ -19,7 +19,11 @@ import jssc.SerialPortList;
  * @author eduardo
  */
 public class ScratchArduino {
-
+    public static final int READ_PINS = 1;
+    public static final int WRITE_ANALOG = 2;
+    public static final int WRITE_DIGITAL = 3;
+    public static final int BYTE_CONTROL = 30;
+    
     public static final String mcsHIGH="true";
     public static final String mcsLOW="false";
     private String msPuerto;
@@ -42,8 +46,7 @@ public class ScratchArduino {
     }    
 
     private int sendAttempts = 0;
-    private byte[] rawData = null;
-    private int[] pingCmd = new int[]{1};
+    private int[] pingCmd = new int[]{READ_PINS};
     private boolean connected = false;
     private Timer moTimer;
     
@@ -92,7 +95,11 @@ public class ScratchArduino {
     public synchronized void openPort() throws Exception{
         if(SerialPortList.getPortNames().length>0){
             try{
-                serialPort = new SerialPort(msPuerto);
+                if(msPuerto==null || msPuerto.equals("")){
+                    serialPort = new SerialPort(SerialPortList.getPortNames()[0]);
+                }else{
+                    serialPort = new SerialPort(msPuerto);
+                }
                 serialPort.openPort();
             }catch(Throwable e){
                 e.printStackTrace();
@@ -111,11 +118,24 @@ public class ScratchArduino {
                 public void serialEvent(SerialPortEvent event) {
                     try {
                         if(event.isRXCHAR()){//If data is available
-                           if(event.getEventValue() >= 3){//Check bytes count in the input buffer
+                           if(event.getEventValue() >= 4){//Check bytes count in the input buffer
                                //Read data, if 10 bytes available 
                                try {
-                                   rawData = serialPort.readBytes(3);
-                                   processData();
+                                   synchronized(this){
+                                    byte[] rawData = serialPort.readBytes(4);
+                                    if(rawData[0]==BYTE_CONTROL){
+                                        processData(rawData, null);
+                                    }else if(rawData[1]==BYTE_CONTROL){
+                                        byte[] b = serialPort.readBytes(1);
+                                        processData(rawData, b);
+                                    }else if(rawData[2]==BYTE_CONTROL){
+                                        byte[] b = serialPort.readBytes(2);
+                                        processData(rawData, b);
+                                    }else if(rawData[3]==BYTE_CONTROL){
+                                        byte[] b = serialPort.readBytes(3);
+                                        processData(rawData, b);
+                                    }
+                                   }
                                }
                                catch (SerialPortException ex) {
                                    System.out.println(ex);
@@ -167,7 +187,6 @@ public class ScratchArduino {
     }
     public synchronized void closePort() throws Exception {
         connected = false;
-        rawData=null;
         if (serialPort != null) {
             SerialPort loAux = serialPort;
             serialPort = null;
@@ -184,11 +203,23 @@ public class ScratchArduino {
         }
     }
 
-    private void processData() {
-        inputVals.d0 = rawData[0] & 0xFF;
-        inputVals.a0 = rawData[1] & 0xFF;
-        inputVals.a1 = rawData[2] & 0xFF;
-        rawData = null;
+    private void processData(byte[] rawData, byte[] rawData2) {
+        byte[] lab=rawData;
+        if(rawData2!=null){
+            lab = new byte[4];
+            
+            for(int i = rawData2.length; i <rawData.length; i++){
+               lab[i-rawData2.length]=rawData[i]; 
+            }
+            for(int i = 0; i <rawData2.length; i++){
+               lab[i+rawData.length-rawData2.length]=rawData2[i]; 
+            }
+            
+        }
+        inputVals.d0 = lab[1] & 0xFF;
+        inputVals.a0 = lab[2] & 0xFF;
+        inputVals.a1 = lab[3] & 0xFF;
+        
     }
     
     private int[] appendBuffer(int[] buffer1, int buffer2) {
@@ -199,9 +230,15 @@ public class ScratchArduino {
     }
 
     public synchronized void write(int[] b) throws Exception {
+        byte[] lab = new byte[b.length+1];
+        lab[0]=(byte)BYTE_CONTROL;
         for(int i = 0; i < b.length; i++){
-            serialPort.writeByte((byte)b[i]);
+            lab[i+1]=(byte)b[i];
+//            System.out.print((int)b[i]);
+//            System.out.print(" ");
         }
+//        System.out.println();
+        serialPort.writeBytes(lab);
     }
 
     public int analogRead(int pin) {
@@ -237,9 +274,9 @@ public class ScratchArduino {
         return false;
     }
 
-    public void analogWrite(int pin, int val) throws Exception {
+    public synchronized void analogWrite(int pin, int val) throws Exception {
         int[] output = new int[3];
-        output[0] = 2;
+        output[0] = WRITE_ANALOG;
         switch (pin) {
             case 0:
                 output[1] = outputPins.d1;
@@ -255,6 +292,7 @@ public class ScratchArduino {
         write(output);
     }
     public void analogWrite(String pin, int val) throws Exception {
+//        System.out.println("analogWrite pin: " + pin + "   valor:" + val);
         if(pin.equalsIgnoreCase("d1")){
             analogWrite(0, val);
         }else if(pin.equalsIgnoreCase("d5")){
@@ -273,9 +311,10 @@ public class ScratchArduino {
         }
     }
 
-    public void digitalWrite(int pin, String val) throws Exception {
+    public synchronized void digitalWrite(int pin, String val) throws Exception {
+//        System.out.println("digitalWrite pin: " + pin + "   valor:" + val);
         int[] output = new int[3];
-        output[0] = 3;
+        output[0] = WRITE_DIGITAL;
 
         switch (pin) {
             case 0:

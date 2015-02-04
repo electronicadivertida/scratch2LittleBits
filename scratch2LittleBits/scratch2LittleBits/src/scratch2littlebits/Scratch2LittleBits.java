@@ -179,7 +179,7 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
                     moArduino.setPuerto(jComboBox1.getSelectedItem().toString());
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    JOptionPane.showConfirmDialog(rootPane, ex.toString());
+                    JOptionPane.showMessageDialog(rootPane, ex.toString());
                 }
             }
         }
@@ -225,11 +225,11 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
                 try {
                     Scratch2LittleBits lo = new Scratch2LittleBits();
                     lo.conectarHTTP();
-                    lo.conectarArduino("/dev/ttyACM0");
+                    lo.conectarArduino("");
                     lo.setVisible(true);
                 } catch (Throwable ex) {
                     ex.printStackTrace();
-                    JOptionPane.showConfirmDialog(new JLabel(), ex.toString());
+                    JOptionPane.showMessageDialog(new JLabel(), ex.toString());
                 }
             }
         });
