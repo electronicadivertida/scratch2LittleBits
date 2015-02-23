@@ -141,7 +141,7 @@ int readAnalogPort(int plPin) {
   int value;
   value = analogRead(plPin);
   value = smoothingValue(plPin, value);
-  if (value == 1022) value = 1023;
+  if (value >= 1022) value = 1024;
   return value/4;
 }
 
