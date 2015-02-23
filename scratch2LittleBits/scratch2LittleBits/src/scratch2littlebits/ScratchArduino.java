@@ -216,9 +216,9 @@ public class ScratchArduino {
             }
             
         }
-        inputVals.d0 = lab[1] & 0xFF;
-        inputVals.a0 = lab[2] & 0xFF;
-        inputVals.a1 = lab[3] & 0xFF;
+        inputVals.d0 = (int)((lab[1] & 0xFF)/255.0);
+        inputVals.a0 = (int)((lab[2] & 0xFF)/255.0);
+        inputVals.a1 = (int)((lab[3] & 0xFF)/255.0);
         
     }
     
@@ -288,7 +288,13 @@ public class ScratchArduino {
                 output[1] = outputPins.d9;
                 break;
         }
-        output[2] = val;
+        if(val > 100){
+            val=100;
+        }
+        if(val<0){
+            val=0;
+        }
+        output[2] = (int)((val*255.0)/100.0);
         write(output);
     }
     public void analogWrite(String pin, int val) throws Exception {
