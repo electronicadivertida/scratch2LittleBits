@@ -3,13 +3,13 @@
     "extensionPort": 8099,
     "blockSpecs": [
         [" ", "digitalWrite %m.outDPins %m.dOutp", "digitalWrite", "d1", "true"],
-        [" ", "analogWrite %m.outAPins %n", "analogWrite", "d5", "255"],
+        [" ", "analogWrite %m.outAPins %n", "analogWrite", "d5", "100"],
         ["b", "digitalRead %m.inDPins", "digitalRead", "d0"],
         ["r", "analogRead %m.inAPins", "analogRead", "a0"]
 
     ],
     "menus": {
-        "outDPins": ["d1", "d5", "d9"],
+        "outDPins": ["d1"],
         "outAPins": ["d5", "d9"],
         "inDPins": ["d0"],
         "inAPins": ["a0", "a1"],
