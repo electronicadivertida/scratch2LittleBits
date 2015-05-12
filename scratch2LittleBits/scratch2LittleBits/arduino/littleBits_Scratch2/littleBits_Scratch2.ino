@@ -1,11 +1,4 @@
-      /****************************************************/
-/*                                                  */
-/*    littleBits Scratch 2.0 extension              */
-/*    created by Kreg Hanning 2014                  */
-/*                                                  */
-/****************************************************/
 
-// Status codes sent from Scratch
 const int READ_PINS = 1;
 const int WRITE_ANALOG = 2;
 const int WRITE_DIGITAL = 3;
