@@ -26,6 +26,15 @@ public class ScratchArduino {
     
     public static final String mcsHIGH="true";
     public static final String mcsLOW="false";
+
+    public static final String mcsPuertoEntradaA0="a0";
+    public static final String mcsPuertoEntradaA1="a1";
+    public static final String mcsPuertoEntradaD0="d0";
+        
+    public static final String mcsPuertoSalidaD1="d1";
+    public static final String mcsPuertoSalidaD5="d5";
+    public static final String mcsPuertoSalidaD9="d9";
+    
     private String msPuerto;
     private SerialPort serialPort;
     
@@ -216,9 +225,9 @@ public class ScratchArduino {
             }
             
         }
-        inputVals.d0 = (int)((lab[1] & 0xFF)/255.0);
-        inputVals.a0 = (int)((lab[2] & 0xFF)/255.0);
-        inputVals.a1 = (int)((lab[3] & 0xFF)/255.0);
+        inputVals.d0 = (int)(((lab[1] & 0xFF)*100.0)/255.0);
+        inputVals.a0 = (int)(((lab[2] & 0xFF)*100.0)/255.0);
+        inputVals.a1 = (int)(((lab[3] & 0xFF)*100.0)/255.0);
         
     }
     
@@ -258,21 +267,30 @@ public class ScratchArduino {
     }
 
     public int analogRead(String pspin) {
-        if(pspin.equalsIgnoreCase("d0")){
+        if(pspin.equalsIgnoreCase(mcsPuertoEntradaD0)){
             return analogRead(0);
-        } else if(pspin.equalsIgnoreCase("a0")){
+        } else if(pspin.equalsIgnoreCase(mcsPuertoEntradaA0)){
             return analogRead(1);
-        } else {
+        } else if(pspin.equalsIgnoreCase(mcsPuertoEntradaA1)){
             return analogRead(2);
         }
+        return 0;
     }
 
     public boolean digitalRead(int pin) {
-        if (analogRead(pin) > 0) {
-            return true;
-        }
-        return false;
+        return (analogRead(pin) > 0);
     }
+
+    public boolean digitalRead(String pspin) {
+        if(pspin.equalsIgnoreCase(mcsPuertoEntradaD0)){
+            return digitalRead(0);
+        } else if(pspin.equalsIgnoreCase(mcsPuertoEntradaA0)){
+            return digitalRead(1);
+        } else {
+            return digitalRead(2);
+        }
+    }
+
 
     public synchronized void analogWrite(int pin, int val) throws Exception {
         int[] output = new int[3];
@@ -299,20 +317,20 @@ public class ScratchArduino {
     }
     public void analogWrite(String pin, int val) throws Exception {
 //        System.out.println("analogWrite pin: " + pin + "   valor:" + val);
-        if(pin.equalsIgnoreCase("d1")){
+        if(pin.equalsIgnoreCase(mcsPuertoSalidaD1)){
             analogWrite(0, val);
-        }else if(pin.equalsIgnoreCase("d5")){
+        }else if(pin.equalsIgnoreCase(mcsPuertoSalidaD5)){
             analogWrite(1, val);
-        }else if(pin.equalsIgnoreCase("d9")){
+        }else if(pin.equalsIgnoreCase(mcsPuertoSalidaD9)){
             analogWrite(2, val);
         }
     }
     public void digitalWrite(String pin, String val) throws Exception {
-        if(pin.equalsIgnoreCase("d1")){
+        if(pin.equalsIgnoreCase(mcsPuertoSalidaD1)){
             digitalWrite(0, val);
-        }else if(pin.equalsIgnoreCase("d5")){
+        }else if(pin.equalsIgnoreCase(mcsPuertoSalidaD5)){
             digitalWrite(1, val);
-        }else if(pin.equalsIgnoreCase("d9")){
+        }else if(pin.equalsIgnoreCase(mcsPuertoSalidaD9)){
             digitalWrite(2, val);
         }
     }

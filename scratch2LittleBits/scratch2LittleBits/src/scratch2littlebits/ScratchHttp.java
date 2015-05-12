@@ -19,7 +19,7 @@ import java.util.Arrays;
  * @author eduardo
  */
 public class ScratchHttp implements Runnable{
-    private static final int PORT = 8099; // set to your extension's port number
+    private static final int PORT = 8099; // Número de puerto, debe coincidir con archivo scratch2LittleBitsDEF.json
     private InputStream sockIn;
     private OutputStream sockOut;
     private final Scratch2LittleBits moControl;
@@ -132,9 +132,9 @@ public class ScratchHttp implements Runnable{
             if(moControl.getArduino()!=null && moControl.getArduino().isConnected()){
                 if(header.equalsIgnoreCase("poll")){
                     sendResponse(""
-                            + "analogRead/a0 " + String.valueOf((int)moControl.getArduino().getInputVals().a0) + Character.toString((char)10)
-                            + "analogRead/a1 " + String.valueOf((int)moControl.getArduino().getInputVals().a1) + Character.toString((char)10)
-                            + "digitalRead/d0 " + (moControl.getArduino().getInputVals().d0!=0?"true":"false") + Character.toString((char)10)
+                            + "analogRead/a0 " + String.valueOf((int)moControl.getArduino().analogRead(ScratchArduino.mcsPuertoEntradaA0) ) + Character.toString((char)10)
+                            + "analogRead/a1 " + String.valueOf((int)moControl.getArduino().analogRead(ScratchArduino.mcsPuertoEntradaA1)) + Character.toString((char)10)
+                            + "digitalRead/d0 " + (moControl.getArduino().digitalRead(ScratchArduino.mcsPuertoEntradaD0)?"true":"false") + Character.toString((char)10)
 //                            + msWhenDigital
 //                            + msWhenAnalog
                     );
