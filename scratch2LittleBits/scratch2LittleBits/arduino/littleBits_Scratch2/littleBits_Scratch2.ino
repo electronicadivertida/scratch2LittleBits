@@ -2,7 +2,6 @@
 const int READ_PINS = 1;
 const int WRITE_ANALOG = 2;
 const int WRITE_DIGITAL = 3;
-const int BYTE_CONTROL = 30;
 
 // Analog input smoothing
 // http://arduino.cc/en/Tutorial/Smoothing
@@ -59,16 +58,12 @@ void loop() {
   // Check if there are bytes on the Serial port
   if (Serial.available() > 0) {
     
-    // 1 byte control
-    incomingByte = Serial.read();
-    if(BYTE_CONTROL == incomingByte){
       // Get first available byte
       incomingByte = Serial.read();
       
       if (incomingByte == READ_PINS) {
       
         // Read digital pin 0
-        Serial.write(BYTE_CONTROL);
         Serial.write(digitalRead(0));
         
         // Get averages for analog pins 0 and 1
@@ -104,7 +99,6 @@ void loop() {
            digitalWrite(outputPin, outputVal);
         }
       
-      } 
     }
   }
   // Analog input smoothing
@@ -127,15 +121,15 @@ int smoothingValue(int channel, int value) {
       smoothingIndex[channel]=0;
     }
 
-    return int(round(smoothingTotal[channel] / (maxNumReadings)));
+    return int(round((double)smoothingTotal[channel] / ((double)maxNumReadings)));
 }
 
 int readAnalogPort(int plPin) {
   int value;
   value = analogRead(plPin);
   value = smoothingValue(plPin, value);
-  if (value >= 1022) value = 1024;
-  return value/4;
+  if (value >= 1020) value = 1020;//pq la division por 4 no debe de superar 255
+  return ((double)value)/4.0;
 }
 
 //int readDigitalPort(int plPin) {
