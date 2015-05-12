@@ -22,7 +22,6 @@ public class ScratchArduino {
     public static final int READ_PINS = 1;
     public static final int WRITE_ANALOG = 2;
     public static final int WRITE_DIGITAL = 3;
-    public static final int BYTE_CONTROL = 30;
     
     public static final String mcsHIGH="true";
     public static final String mcsLOW="false";
@@ -77,7 +76,7 @@ public class ScratchArduino {
                         if (sendAttempts >= 10) {
                             sendAttempts=0;
                             try{
-                                Thread.sleep(2000);
+                                Thread.sleep(1000);
                             }catch(Exception e){}
                             closePort();
                             openPort();
@@ -87,6 +86,7 @@ public class ScratchArduino {
                             write(pingCmd);
                         }catch(Throwable e){
                             sendAttempts++;
+                            Thread.sleep(100);
                         }
 
                     } catch (Throwable ex) {
@@ -127,24 +127,13 @@ public class ScratchArduino {
                 public void serialEvent(SerialPortEvent event) {
                     try {
                         if(event.isRXCHAR()){//If data is available
-                           if(event.getEventValue() >= 4){//Check bytes count in the input buffer
+                           if(event.getEventValue() >= 3){//Check bytes count in the input buffer
                                //Read data, if 10 bytes available 
                                try {
-                                   synchronized(this){
-                                    byte[] rawData = serialPort.readBytes(4);
-                                    if(rawData[0]==BYTE_CONTROL){
-                                        processData(rawData, null);
-                                    }else if(rawData[1]==BYTE_CONTROL){
-                                        byte[] b = serialPort.readBytes(1);
-                                        processData(rawData, b);
-                                    }else if(rawData[2]==BYTE_CONTROL){
-                                        byte[] b = serialPort.readBytes(2);
-                                        processData(rawData, b);
-                                    }else if(rawData[3]==BYTE_CONTROL){
-                                        byte[] b = serialPort.readBytes(3);
-                                        processData(rawData, b);
+                                    synchronized(this){
+                                        byte[] rawData = serialPort.readBytes(3);
+                                        processData(rawData);
                                     }
-                                   }
                                }
                                catch (SerialPortException ex) {
                                    System.out.println(ex);
@@ -156,12 +145,12 @@ public class ScratchArduino {
                                System.out.println("CTS - ON");
                            }
                            else {
-                               closePort();
+//                               closePort();
                                System.out.println("CTS - OFF");
                            }
                        }
                        else if(event.isDSR()){///If DSR line has changed state
-                           closePort();
+//                           closePort();
                            if(event.getEventValue() == 1){//If line is ON
                                System.out.println("DSR - ON");
                            }
@@ -212,22 +201,12 @@ public class ScratchArduino {
         }
     }
 
-    private void processData(byte[] rawData, byte[] rawData2) {
+    private void processData(byte[] rawData) {
         byte[] lab=rawData;
-        if(rawData2!=null){
-            lab = new byte[4];
-            
-            for(int i = rawData2.length; i <rawData.length; i++){
-               lab[i-rawData2.length]=rawData[i]; 
-            }
-            for(int i = 0; i <rawData2.length; i++){
-               lab[i+rawData.length-rawData2.length]=rawData2[i]; 
-            }
-            
-        }
-        inputVals.d0 = (int)(((lab[1] & 0xFF)*100.0)/255.0);
-        inputVals.a0 = (int)(((lab[2] & 0xFF)*100.0)/255.0);
-        inputVals.a1 = (int)(((lab[3] & 0xFF)*100.0)/255.0);
+        
+        inputVals.d0 = (int)(((lab[0] & 0xFF)*100.0)/255.0);
+        inputVals.a0 = (int)(((lab[1] & 0xFF)*100.0)/255.0);
+        inputVals.a1 = (int)(((lab[2] & 0xFF)*100.0)/255.0);
         
     }
     
@@ -239,10 +218,9 @@ public class ScratchArduino {
     }
 
     public synchronized void write(int[] b) throws Exception {
-        byte[] lab = new byte[b.length+1];
-        lab[0]=(byte)BYTE_CONTROL;
+        byte[] lab = new byte[b.length];
         for(int i = 0; i < b.length; i++){
-            lab[i+1]=(byte)b[i];
+            lab[i]=(byte)b[i];
 //            System.out.print((int)b[i]);
 //            System.out.print(" ");
         }
