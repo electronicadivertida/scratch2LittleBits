@@ -106,7 +106,7 @@ void loop() {
   averageA0 = readAnalogPort(A0);
   averageA1 = readAnalogPort(A1);
   
-  delay(1);
+  delay(10);
 }
 
 
