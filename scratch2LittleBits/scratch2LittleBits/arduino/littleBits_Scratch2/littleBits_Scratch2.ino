@@ -7,7 +7,7 @@ const int WRITE_DIGITAL = 3;
 // http://arduino.cc/en/Tutorial/Smoothing
 
 const int sensorChannels = 20;
-const int maxNumReadings = 7;
+const int maxNumReadings = 3;
 
 int smoothingValues[sensorChannels][maxNumReadings];
 int smoothingIndex[sensorChannels];
@@ -106,7 +106,7 @@ void loop() {
   averageA0 = readAnalogPort(A0);
   averageA1 = readAnalogPort(A1);
   
-  delay(10);
+  delay(16);
 }
 
 
