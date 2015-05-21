@@ -150,7 +150,7 @@ public class ScratchArduino {
                            }
                        }
                        else if(event.isDSR()){///If DSR line has changed state
-                           closePort();
+//                           closePort();
                            if(event.getEventValue() == 1){//If line is ON
                                System.out.println("DSR - ON");
                            }

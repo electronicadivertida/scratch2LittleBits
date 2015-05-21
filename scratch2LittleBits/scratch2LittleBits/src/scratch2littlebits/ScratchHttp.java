@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  *
@@ -24,7 +25,8 @@ public class ScratchHttp implements Runnable{
     private OutputStream sockOut;
     private final Scratch2LittleBits moControl;
     private boolean mbconectado=false;
-    
+    int mlContador;
+    Date moDate = new Date();
 //    private String msWhenDigital="";
 //    private String msWhenAnalog="";
 //    
@@ -128,7 +130,10 @@ public class ScratchHttp implements Runnable{
     }
 
     private void doCommand(String header) throws Throwable {
-
+//        mlContador++;
+//        Date loDate = new Date();
+//        System.out.println(String.valueOf(mlContador) + " " + String.valueOf(moDate.getTime() - loDate.getTime()));
+//        moDate = loDate;
             if(moControl.getArduino()!=null && moControl.getArduino().isConnected()){
                 if(header.equalsIgnoreCase("poll")){
                     sendResponse(""
