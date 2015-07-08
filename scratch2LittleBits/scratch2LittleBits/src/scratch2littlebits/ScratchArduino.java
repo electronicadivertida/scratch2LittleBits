@@ -6,6 +6,7 @@
 package scratch2littlebits;
 
 
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import jssc.SerialPort;
@@ -61,7 +62,6 @@ public class ScratchArduino {
     private InputVals inputVals = new InputVals();
     private OutputPins outputPins = new OutputPins();
     
-    
 
     public ScratchArduino(String PuertoIdent) throws Exception {
    
@@ -72,7 +72,7 @@ public class ScratchArduino {
                 @Override
                 public void run() {
                     try {
-
+                        
                         if (sendAttempts >= 10) {
                             sendAttempts=0;
                             try{
@@ -132,6 +132,7 @@ public class ScratchArduino {
                                try {
                                     synchronized(this){
                                         byte[] rawData = serialPort.readBytes(3);
+//                                        System.out.println("rawData: " + String.valueOf(rawData));
                                         processData(rawData);
                                     }
                                }
@@ -208,6 +209,9 @@ public class ScratchArduino {
         inputVals.a0 = (int)(((lab[1] & 0xFF)*100.0)/255.0);
         inputVals.a1 = (int)(((lab[2] & 0xFF)*100.0)/255.0);
         
+//        System.out.println("d0: " + String.valueOf(inputVals.d0));
+//        System.out.println("a0: " + String.valueOf(inputVals.a0));
+//        System.out.println("a1: " + String.valueOf(inputVals.a1));
     }
     
     private int[] appendBuffer(int[] buffer1, int buffer2) {

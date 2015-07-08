@@ -188,9 +188,10 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     private void recargarPuertos(){
         String[] lasLista = ScratchArduino.getListaPuertos();
         jComboBox1.removeAllItems();
-        for(int i = 0 ; i < lasLista.length; i++)
+        for(int i = 0 ; i < lasLista.length; i++){
             jComboBox1.addItem(lasLista[i]);
-        
+        }
+        jComboBox1.setSelectedIndex(lasLista.length-1);
     }
     /**
      * @param args the command line arguments
