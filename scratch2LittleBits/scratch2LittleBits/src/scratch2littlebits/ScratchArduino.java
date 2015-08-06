@@ -132,7 +132,7 @@ public class ScratchArduino {
                                try {
                                     synchronized(this){
                                         byte[] rawData = serialPort.readBytes(3);
-//                                        System.out.println("rawData: " + String.valueOf(rawData));
+//                                        System.out.println("rawData: " + String.valueOf(rawData[0]));
                                         processData(rawData);
                                     }
                                }
@@ -205,7 +205,7 @@ public class ScratchArduino {
     private void processData(byte[] rawData) {
         byte[] lab=rawData;
         
-        inputVals.d0 = (int)(((lab[0] & 0xFF)*100.0)/255.0);
+        inputVals.d0 = (int)(((lab[0] & 0xFF)*100.0));//digital 0 o 1 -> 0 o 100
         inputVals.a0 = (int)(((lab[1] & 0xFF)*100.0)/255.0);
         inputVals.a1 = (int)(((lab[2] & 0xFF)*100.0)/255.0);
         
