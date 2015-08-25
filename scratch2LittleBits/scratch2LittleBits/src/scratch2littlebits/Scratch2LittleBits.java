@@ -9,8 +9,6 @@ package scratch2littlebits;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -23,7 +21,9 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
 
     private ScratchArduino moArduino;
     private ScratchHttp moHTTP;
+    private ScratchHttp moHTTPAndroid;
     private Thread moThrHTTP;
+    private Thread moThrHTTPAndroid;
     private final Timer moTimer;
     private boolean mbConectados = false;
 
@@ -39,14 +39,19 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
                     try {
 
                         if(moArduino!=null && moArduino.isConnected()){
-                            lblLittleBits.setText("Conectado");
+                            lblLittleBits.setText("LittleBits Conectado");
                         }else{
-                            lblLittleBits.setText("DESCONECTADO");
+                            lblLittleBits.setText("LittleBits DESCONECTADO");
                         }
                         if(moHTTP!=null && moHTTP.isConectado()){
-                            lblScratch.setText("Conectado");
+                            lblScratch.setText("Scratch Conectado");
                         }else{
-                            lblScratch.setText("DESCONECTADO");
+                            lblScratch.setText("Scratch DESCONECTADO");
+                        }
+                        if(moHTTPAndroid!=null && moHTTPAndroid.isConectado()){
+                            lblAndroid.setText("Android Conectado");
+                        }else{
+                            lblAndroid.setText("Android DESCONECTADO");
                         }
                         if(moHTTP!=null && moHTTP.isConectado() && moArduino!=null && moArduino.isConnected()){
                             if(!mbConectados){
@@ -72,9 +77,13 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     }
 
     public void conectarHTTP() throws IOException {
-        moHTTP = new ScratchHttp(this);
+        moHTTP = new ScratchHttp(this, ScratchHttp.PORT);
         moThrHTTP = new Thread(moHTTP);
         moThrHTTP.start();
+
+        moHTTPAndroid = new ScratchHttp(this, ScratchHttp.PORTAndroid);
+        moThrHTTPAndroid = new Thread(moHTTPAndroid);
+        moThrHTTPAndroid.start();
     }
 
     public void conectarArduino(String psPuerto) throws Exception {
@@ -102,6 +111,7 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
         jComboBox1 = new javax.swing.JComboBox();
         lblLittleBits = new javax.swing.JLabel();
         lblScratch = new javax.swing.JLabel();
+        lblAndroid = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Scratch + Littlebits");
@@ -160,6 +170,16 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
         getContentPane().add(lblScratch, gridBagConstraints);
+
+        lblAndroid.setBackground(new java.awt.Color(0, 255, 51));
+        lblAndroid.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblAndroid.setText(" ");
+        lblAndroid.setOpaque(true);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
+        getContentPane().add(lblAndroid, gridBagConstraints);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -242,6 +262,7 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel lblAndroid;
     private javax.swing.JLabel lblConexion;
     private javax.swing.JLabel lblLittleBits;
     private javax.swing.JLabel lblScratch;

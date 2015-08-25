@@ -20,19 +20,22 @@ import java.util.Date;
  * @author eduardo
  */
 public class ScratchHttp implements Runnable{
-    private static final int PORT = 8099; // Número de puerto, debe coincidir con archivo scratch2LittleBitsDEF.json
+    public static final int PORT = 8099; // Número de puerto, debe coincidir con archivo scratch2LittleBitsDEF.json
+    public static final int PORTAndroid = 8100; // Número de puerto, debe coincidir con archivo scratch2LittleBitsDEF.json
     private InputStream sockIn;
     private OutputStream sockOut;
     private final Scratch2LittleBits moControl;
     private boolean mbconectado=false;
     int mlContador;
     Date moDate = new Date();
+    private final int mlPuerto;
 //    private String msWhenDigital="";
 //    private String msWhenAnalog="";
 //    
 
-    public ScratchHttp(Scratch2LittleBits poControl){
+    public ScratchHttp(Scratch2LittleBits poControl, int plPuerto){
         moControl=poControl;
+        mlPuerto=plPuerto;
     }
     
     @Override
@@ -42,7 +45,7 @@ public class ScratchHttp implements Runnable{
             InetAddress addr = InetAddress.getLocalHost();
             System.out.println("HTTPExtensionExample helper app started on " + addr.toString());
             
-            ServerSocket serverSock = new ServerSocket(PORT);
+            ServerSocket serverSock = new ServerSocket(mlPuerto);
             while (true) {
                 Socket sock = serverSock.accept();
                 mbconectado=true;
@@ -135,12 +138,18 @@ public class ScratchHttp implements Runnable{
 //        Date loDate = new Date();
 //        System.out.println(String.valueOf(mlContador) + " " + String.valueOf(moDate.getTime() - loDate.getTime()));
 //        moDate = loDate;
-            if(moControl.getArduino()!=null && moControl.getArduino().isConnected()){
+        
+            if(moControl.getArduino()!=null ){
                 if(header.equalsIgnoreCase("poll")){
                     sendResponse(""
                             + "analogRead/a0 " + String.valueOf((int)moControl.getArduino().analogRead(ScratchArduino.mcsPuertoEntradaA0) ) + Character.toString((char)10)
                             + "analogRead/a1 " + String.valueOf((int)moControl.getArduino().analogRead(ScratchArduino.mcsPuertoEntradaA1)) + Character.toString((char)10)
-                            + "digitalRead/d0 " + (moControl.getArduino().digitalRead(ScratchArduino.mcsPuertoEntradaD0)?"true":"false") + Character.toString((char)10)
+                            + "digitalRead/d0 " + (moControl.getArduino().digitalRead(ScratchArduino.mcsPuertoEntradaD0)?ScratchArduino.mcsHIGH:ScratchArduino.mcsLOW) + Character.toString((char)10)
+
+                            + "analogWrite/d5 " + String.valueOf((int)moControl.getArduino().getOutputPins().d5) + Character.toString((char)10)
+                            + "analogWrite/d9 " + String.valueOf((int)moControl.getArduino().getOutputPins().d9) + Character.toString((char)10)
+                            + "digitalWrite/d1 " + (moControl.getArduino().getOutputPins().d1>0 ?ScratchArduino.mcsHIGH:ScratchArduino.mcsLOW) + Character.toString((char)10)
+                            
 //                            + msWhenDigital
 //                            + msWhenAnalog
                     );
@@ -149,14 +158,23 @@ public class ScratchHttp implements Runnable{
 //                        System.out.println(ls);
 //                    }
                 }else if(header.equalsIgnoreCase("reset_all")){
+                    System.out.println(header);
                     moControl.getArduino().resetAll();
                     sendResponse("ok");
                 }else {
+                    System.out.println(header);
                     String[] las = header.split("/");
                     if(las[0].equalsIgnoreCase("digitalWrite")){
                         moControl.getArduino().digitalWrite(las[1], las[2]);
                     }else if(las[0].equalsIgnoreCase("analogWrite")){
                         moControl.getArduino().analogWrite(las[1], Double.valueOf(las[2]).intValue());
+                    }else if(las[0].equalsIgnoreCase("digitalRead")){
+                        moControl.getArduino().setDigitalReadExterno(las[1], las[2]);
+                    }else if(las[0].equalsIgnoreCase("analogRead")){
+                        moControl.getArduino().setAnalogReadExterno(las[1], Double.valueOf(las[2]).intValue());
+                    }else if(las[0].equalsIgnoreCase("readNormal")){
+                        moControl.getArduino().setReadExternoNormal(las[1]);
+    
 //                    }else if(las[0].equalsIgnoreCase("whenDigitalRead")){
 //                        //no va
 //                        msWhenDigital=header + " " + (moControl.getArduino().getInputVals().d0!=0?"true":"false") +"\n";// + Character.toString((char)10);
@@ -185,7 +203,8 @@ public class ScratchHttp implements Runnable{
 //                        msWhenAnalog=header + " " + (lbR?"true":"false")  + Character.toString((char)10);
 //                        //"whenAnalogRead/"+las[1] + "/"+ op + "/" + las[3]
 //                        sendResponse(msWhenAnalog);
-                    } else{
+                    } 
+                    else{
                         System.out.println("Comando no procesado: " + header);
                     }
                     sendResponse("ok");
