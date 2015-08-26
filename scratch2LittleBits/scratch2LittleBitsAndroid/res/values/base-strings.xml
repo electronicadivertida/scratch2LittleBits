@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resources>
+    <string name="app_name">LittleBits Scratch2</string>
+    <string name="intro_message">
+       Connect your bits with scratch
+    </string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_refresh"
+          android:title="@string/menu_refresh"
+          android:checkable="false"
+          android:orderInCategory="1"
+          android:showAsAction="ifRoom"/>
+    <item android:id="@+id/menu_stop"
+          android:title="@string/menu_stop"
+          android:orderInCategory="101"
+          android:showAsAction="ifRoom|withText"/>
+    <item android:id="@+id/add_master"
+          android:title="@string/add_master"
+          android:orderInCategory="102"
+          android:showAsAction="ifRoom|withText"/>
+
+</menu>
