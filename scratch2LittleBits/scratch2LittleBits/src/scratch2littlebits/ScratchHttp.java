@@ -121,6 +121,7 @@ public class ScratchHttp implements Runnable{
         httpResponse += "Access-Control-Allow-Origin: *" + crlf;
         httpResponse += crlf;
         httpResponse += s + crlf;
+//        if(mlPuerto==PORTAndroid)
 //        System.out.println(httpResponse);
         byte[] outBuf = httpResponse.getBytes();
         sockOut.write(outBuf, 0, outBuf.length);

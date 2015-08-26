@@ -220,12 +220,12 @@ public class ScratchArduino {
 //        System.out.println("a1: " + String.valueOf(inputVals.a1));
     }
     
-    private int[] appendBuffer(int[] buffer1, int buffer2) {
-        int[] tmp = new int[buffer1.length + 1];
-        System.arraycopy(buffer1, 0, tmp, 0, buffer1.length);
-        tmp[buffer1.length] = buffer2;
-        return tmp;
-    }
+//    private int[] appendBuffer(int[] buffer1, int buffer2) {
+//        int[] tmp = new int[buffer1.length + 1];
+//        System.arraycopy(buffer1, 0, tmp, 0, buffer1.length);
+//        tmp[buffer1.length] = buffer2;
+//        return tmp;
+//    }
 
     public synchronized void write(int[] b) throws Exception {
         byte[] lab = new byte[b.length];
@@ -238,45 +238,39 @@ public class ScratchArduino {
         serialPort.writeBytes(lab);
     }
 
-    public int analogRead(int pin) {
-        int lResult = 0;
-        switch (pin) {
-            case 0:
-                lResult = inputVals.d0;
-                break;
-            case 1:
-                lResult = inputVals.a0;
-                break;
-            case 2:
-                lResult = inputVals.a1;
-                break;
-        }
-        return lResult;
-    }
+//    public int analogRead(int pin) {
+//        int lResult = 0;
+//        switch (pin) {
+//            case 0:
+//                lResult = inputVals.d0;
+//                break;
+//            case 1:
+//                lResult = inputVals.a0;
+//                break;
+//            case 2:
+//                lResult = inputVals.a1;
+//                break;
+//        }
+//        return lResult;
+//    }
 
     public int analogRead(String pspin) {
         if(pspin.equalsIgnoreCase(mcsPuertoEntradaD0)){
-            return analogRead(0);
+            return inputVals.d0;
         } else if(pspin.equalsIgnoreCase(mcsPuertoEntradaA0)){
-            return analogRead(1);
+            return inputVals.a0;
         } else if(pspin.equalsIgnoreCase(mcsPuertoEntradaA1)){
-            return analogRead(2);
+            return inputVals.a1;
         }
         return 0;
     }
-
-    public boolean digitalRead(int pin) {
-        return (analogRead(pin) > 0);
-    }
+//
+//    public boolean digitalRead(int pin) {
+//        return (analogRead(pin) > 0);
+//    }
 
     public boolean digitalRead(String pspin) {
-        if(pspin.equalsIgnoreCase(mcsPuertoEntradaD0)){
-            return digitalRead(0);
-        } else if(pspin.equalsIgnoreCase(mcsPuertoEntradaA0)){
-            return digitalRead(1);
-        } else {
-            return digitalRead(2);
-        }
+        return analogRead(pspin)>0;
     }
 
 
@@ -306,11 +300,7 @@ public class ScratchArduino {
         output[2] = (int)((val*255.0)/100.0);
         write(output);
     }
-    
-    private synchronized void digitalWrite(int pin, String val) throws Exception {
-//        System.out.println("digitalWrite pin: " + pin + "   valor:" + val);
-        int[] output = new int[3];
-        output[0] = WRITE_DIGITAL;
+    private int getValorDeDigital(String val){
         int ll=0;
         if (val.equals(mcsHIGH)) {
             ll=100;
@@ -325,6 +315,13 @@ public class ScratchArduino {
 	      ll=0;
 	    }            
         }
+        return ll;
+    }
+    private synchronized void digitalWrite(int pin, String val) throws Exception {
+//        System.out.println("digitalWrite pin: " + pin + "   valor:" + val);
+        int[] output = new int[3];
+        output[0] = WRITE_DIGITAL;
+        int ll=getValorDeDigital(val);
         switch (pin) {
             case 1:
                 output[1] = 1;//d1
@@ -404,27 +401,27 @@ public class ScratchArduino {
             inputVals.a1Externo=false;
         }
     }
-    
-
-    public boolean whenAnalogRead(int pin, char op, int val) {
-        if (op == '>') {
-            return analogRead(pin) > val;
-        } else if (op == '<') {
-            return analogRead(pin) < val;
-        } else if (op == '=') {
-            return analogRead(pin) == val;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean whenDigitalRead(int pin, String val) {
-        if (val.equalsIgnoreCase("HIGH")) {
-            return digitalRead(pin);
-        } else {
-            return digitalRead(pin) == false;
-        }
-    }
+//    
+//
+//    public boolean whenAnalogRead(int pin, char op, int val) {
+//        if (op == '>') {
+//            return analogRead(pin) > val;
+//        } else if (op == '<') {
+//            return analogRead(pin) < val;
+//        } else if (op == '=') {
+//            return analogRead(pin) == val;
+//        } else {
+//            return false;
+//        }
+//    }
+//
+//    public boolean whenDigitalRead(int pin, String val) {
+//        if (val.equalsIgnoreCase("HIGH")) {
+//            return digitalRead(pin);
+//        } else {
+//            return digitalRead(pin) == false;
+//        }
+//    }
     public InputVals getInputVals(){
         return inputVals;
     }
