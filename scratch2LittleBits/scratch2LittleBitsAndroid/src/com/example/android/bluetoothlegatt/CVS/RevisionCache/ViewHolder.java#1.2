@@ -1,0 +1,243 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.example.android.bluetoothlegatt;
+
+import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.os.AsyncTask;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.TextView;
+import android.widget.Toast;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.UUID;
+
+/**
+ *
+ * @author eduardo
+ */
+public class ViewHolder {
+        private static final String mcsConectar="Conectar";
+        private static final String mcsDesConectar="DesConectar";
+        
+        TextView deviceName;
+        TextView deviceAddress;
+        CheckBox chkValor;
+        CheckBox chkSet;
+        Button btnConectar;
+        BluetoothDevice device;
+        private BluetoothSocket mmSocket;
+        private ConnectedThread moConexion;        
+        String mmUUID;
+        DeviceScanActivity moActividad;
+        
+        ViewHolder(BluetoothDevice podevice, DeviceScanActivity poActividad, String psUUID){
+            device = podevice;
+            moActividad=poActividad;
+            mmUUID=psUUID;
+        }
+                
+        public void rellenar(){
+            final String deviceText = device.getName();
+            if (deviceText != null && deviceText.length() > 0)
+                deviceName.setText(deviceText);
+            else
+                deviceName.setText(R.string.unknown_device);
+            deviceAddress.setText(device.getAddress());
+            chkValor.setEnabled(false);
+            chkSet.setEnabled(false);
+            
+            btnConectar.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View arg0) {
+                    if(btnConectar.getText().toString().equalsIgnoreCase(mcsDesConectar)){
+                        moConexion.cancel();
+                        moConexion=null;
+                        mmSocket=null;
+                        chkSet.setEnabled(false);
+                        btnConectar.setText(mcsConectar);
+                    }else{
+                        moActividad.cancelBusqueda();
+                        btnConectar.setEnabled(false);
+                        ConnectAsyncTask connectAsyncTask = new ConnectAsyncTask();
+                        connectAsyncTask.execute(device);                    
+                    }
+                }
+            });
+            chkSet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+                    moConexion.write((arg1 ? (byte)1 : (byte)0));
+                }
+            });
+        }
+        /** Will cancel the listening socket, and cause the thread to finish */
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (Throwable e) { }
+            try {
+                moConexion.cancel();
+            } catch (Throwable e) { }
+            
+        }
+
+        public ConnectedThread getConexion() {
+            return moConexion;
+        }
+        
+        private class ConnectAsyncTask extends AsyncTask<BluetoothDevice, Integer, BluetoothSocket>{
+            private BluetoothSocket mmSocketL;
+            private BluetoothDevice mmDevice;
+            private ConnectedThread moConexionL;
+            private Exception moError;
+            
+                
+            @Override
+            protected BluetoothSocket doInBackground(BluetoothDevice... device) {
+                mmDevice = device[0];
+                try {
+                    mmSocketL = mmDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString(mmUUID));
+                    mmSocketL.connect();
+                    moConexionL = new  ConnectedThread(mmSocketL);
+                    moConexionL.start();
+                } catch (Exception e) { 
+                    moError=e;
+                    e.printStackTrace();
+                }
+                return mmSocketL;
+            }
+            @Override
+            protected void onPostExecute(BluetoothSocket result) {
+                btnConectar.setEnabled(true);
+                if(moError!=null){
+                    Toast.makeText(moActividad, moError.toString(), Toast.LENGTH_SHORT).show();
+                            
+                }else{
+                    //Enable Button
+                    mmSocket=mmSocketL;
+                    moConexion=moConexionL;
+                    btnConectar.setText(mcsDesConectar);
+                    chkSet.setEnabled(true);                
+                }
+            }
+        }
+
+        private class ConnectedThread extends Thread {
+            private final BluetoothSocket mmSocket;
+            private final InputStream mmInStream;
+            private final OutputStream mmOutStream;
+            public int bytes; // bytes returned from read()
+
+            public ConnectedThread(BluetoothSocket socket) throws IOException {
+                mmSocket = socket;
+                InputStream tmpIn = null;
+                OutputStream tmpOut = null;
+
+                // Get the input and output streams, using temp objects because
+                // member streams are final
+
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+  
+
+                mmInStream = tmpIn;
+                mmOutStream = tmpOut;
+            }
+
+            public void run() {
+                // Keep listening to the InputStream until an exception occurs
+                while (true) {
+                    try {
+                        // Read from the InputStream
+                        bytes = mmInStream.read();
+                        if(bytes>0){
+                            chkValor.setChecked(true);
+                        }else{
+                            chkValor.setChecked(false);
+                        }
+                    } catch (IOException e) {
+                        break;
+                    }
+                }
+            }
+
+            /* Call this from the main activity to send data to the remote device */
+            public void write(byte bytes) {
+                try {
+                    mmOutStream.write(bytes);
+                } catch (IOException e) { }
+            }
+
+            /* Call this from the main activity to shutdown the connection */
+            public void cancel() {
+                try {
+                    mmSocket.close();
+                } catch (IOException e) { }
+                try {
+                    mmOutStream.close();
+                } catch (IOException e) { }
+                try {
+                    mmInStream.close();
+                } catch (IOException e) { }
+                
+            }
+        }            
+        
+    }
+//    class AcceptThreadServer extends Thread {
+//        private final BluetoothServerSocket mmServerSocket;
+//        private ConnectedThread moConexion;
+//
+//        public AcceptThreadServer(BluetoothDevice poDevice) {
+//            // Use a temporary object that is later assigned to mmServerSocket,
+//            // because mmServerSocket is final
+//            BluetoothServerSocket tmp = null;
+//            try {
+//                // MY_UUID is the app's UUID string, also used by the client code
+//                tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(poDevice.getName(), UUID.fromString(mmUUID));
+//            } catch (Exception e) { }
+//            mmServerSocket = tmp;
+//        }
+//
+//        public void run() {
+//            BluetoothSocket socket = null;
+//            // Keep listening until exception occurs or a socket is returned
+//            while (true) {
+//                try {
+//                    socket = mmServerSocket.accept();
+//                } catch (IOException e) {
+//                    break;
+//                }
+//                // If a connection was accepted
+//                if (socket != null) {
+//                    try {
+//                        // Do work to manage the connection (in a separate thread)
+//                        moConexion = new  ConnectedThread(socket);
+//                        mmServerSocket.close();
+//                    } catch (IOException e) {
+//                        break;
+//                    }                
+//                    break;
+//                }
+//            }
+//        }
+//
+//        /** Will cancel the listening socket, and cause the thread to finish */
+//        public void cancel() {
+//            try {
+//                mmServerSocket.close();
+//            } catch (IOException e) { }
+//            try {
+//                moConexion.cancel();
+//            } catch (Exception e) { }
+//            
+//        }
+//    } 
+//    
