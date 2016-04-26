@@ -9,8 +9,6 @@ package scratch2littlebits;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
