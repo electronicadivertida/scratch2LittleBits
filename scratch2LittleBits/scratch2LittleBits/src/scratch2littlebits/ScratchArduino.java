@@ -86,6 +86,10 @@ public class ScratchArduino {
 
                         try{
                             write(pingCmd);
+                            sendAttempts--;
+                            if(sendAttempts<0){
+                               sendAttempts=0; 
+                            }
                         }catch(Throwable e){
                             System.out.println("Error " + e.toString());
                             sendAttempts++;
