@@ -72,10 +72,10 @@ void loop() {
         
       } else if (incomingByte == WRITE_ANALOG) {
       
-        // Next byte from Scratch is pin number
+        // Numero de pin
         int outputPin = Serial.read();
         
-        // Next byte from Scratch is pin value
+        // Valor del pin
         int outputVal = Serial.read();
         
         if(outputPin==5 && mlUltValor[1]!=outputVal){
@@ -88,10 +88,10 @@ void loop() {
         }
       } else if (incomingByte == WRITE_DIGITAL) {
       
-        // Next byte from Scratch is pin number
+        // Numero de pin
         int outputPin = Serial.read();
         
-        // Next byte from Scratch is pin value
+        // Valor del pin
         int outputVal = Serial.read();
         
         if(mlUltValor[0]!=outputVal){
@@ -129,7 +129,7 @@ int readAnalogPort(int plPin) {
   value = analogRead(plPin);
   value = smoothingValue(plPin, value);
   if (value >= 1020) value = 1020;//pq la division por 4 no debe de superar 255
-  return ((double)value)/4.0;
+  return ((double)value/4);
 }
 
 //int readDigitalPort(int plPin) {
