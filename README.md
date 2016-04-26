@@ -19,11 +19,12 @@ Instructions
 1. Attach a power bit to the Arduino bit
 2. Connect the Arduino bit to the computer via USB cable
 3. Turn on the power bit
-4. Upload the littleBits_Scratch2.ino using the Arduino IDE. (Full instructions here: http://discuss.littlebits.cc/t/getting-started/109)
-5. Execute with java -jar scratch2LittleBits.jar
-6. Open Scratch 2.0 offline pulse SHIFT key and ```File``` and ```Import experimental HTTP extension```
-7. Choose the scratch2LittleBitsDEF.json
-8. Now you can access the littleBit blocks in the "More Blocks" tab
+4. Upload the littleBits_Scratch2.ino using the Arduino IDE. (Full instructions here: http://discuss.littlebits.cc/t/getting-started/109)<br>
+5. Open the scratch2littlebits.app on OSX. 
+6. (If using the scratch2littlebits.app skip this step) Execute with java -jar scratch2LittleBits.jar
+7. Open Scratch 2.0 offline pulse SHIFT key and ```File``` and ```Import experimental HTTP extension```
+8. Choose the scratch2LittleBitsDEF.json
+9. Now you can access the littleBit blocks in the "More Blocks" tab
 
 Links
 -----
