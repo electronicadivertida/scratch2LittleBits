@@ -36,7 +36,7 @@ public class ScratchArduino {
     public static final String mcsPuertoSalidaD9="d9";
     
     private String msPuerto;
-    private SerialPort serialPort;
+    private SerialPort moSerialPort;
 
 
     public static class InputVals {
@@ -75,7 +75,7 @@ public class ScratchArduino {
                 public void run() {
                     try {
                         
-                        if (sendAttempts >= 10) {
+                        if (sendAttempts >= 10 || moSerialPort==null) {
                             sendAttempts=0;
                             try{
                                 Thread.sleep(1000);
@@ -87,6 +87,7 @@ public class ScratchArduino {
                         try{
                             write(pingCmd);
                         }catch(Throwable e){
+                            System.out.println("Error " + e.toString());
                             sendAttempts++;
                             Thread.sleep(100);
                         }
@@ -107,25 +108,25 @@ public class ScratchArduino {
         if(SerialPortList.getPortNames().length>0){
             try{
                 if(msPuerto==null || msPuerto.equals("")){
-                    serialPort = new SerialPort(SerialPortList.getPortNames()[0]);
+                    moSerialPort = new SerialPort(SerialPortList.getPortNames()[SerialPortList.getPortNames().length-1]);
                 }else{
-                    serialPort = new SerialPort(msPuerto);
+                    moSerialPort = new SerialPort(msPuerto);
                 }
-                serialPort.openPort();
+                moSerialPort.openPort();
             }catch(Throwable e){
                 e.printStackTrace();
-                serialPort = new SerialPort(SerialPortList.getPortNames()[0]);
-                serialPort.openPort();
+                moSerialPort = new SerialPort(SerialPortList.getPortNames()[0]);
+                moSerialPort.openPort();
                 msPuerto=SerialPortList.getPortNames()[0];
             }
 
 
-            serialPort.setParams(SerialPort.BAUDRATE_38400, 
+            moSerialPort.setParams(SerialPort.BAUDRATE_38400, 
                                  SerialPort.DATABITS_8,
                                  SerialPort.STOPBITS_1,
                                  SerialPort.PARITY_NONE);
 
-            serialPort.addEventListener(new SerialPortEventListener() {        
+            moSerialPort.addEventListener(new SerialPortEventListener() {        
                 public void serialEvent(SerialPortEvent event) {
                     try {
                         if(event.isRXCHAR()){//If data is available
@@ -133,7 +134,7 @@ public class ScratchArduino {
                                //Read data, if 10 bytes available 
                                try {
                                     synchronized(this){
-                                        byte[] rawData = serialPort.readBytes(3);
+                                        byte[] rawData = moSerialPort.readBytes(3);
 //                                        System.out.println("rawData: " + String.valueOf(rawData[0]));
                                         processData(rawData);
                                     }
@@ -169,7 +170,7 @@ public class ScratchArduino {
 
             });
             int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;//Prepare mask
-            serialPort.setEventsMask(mask);//Set mask
+            moSerialPort.setEventsMask(mask);//Set mask
 
             try {
                 Thread.sleep(3000); // let bootloader timeout
@@ -188,9 +189,9 @@ public class ScratchArduino {
     }
     public synchronized void closePort() throws Exception {
         connected = false;
-        if (serialPort != null) {
-            SerialPort loAux = serialPort;
-            serialPort = null;
+        if (moSerialPort != null) {
+            SerialPort loAux = moSerialPort;
+            moSerialPort = null;
             loAux.removeEventListener();
             loAux.closePort();
         }
@@ -216,8 +217,8 @@ public class ScratchArduino {
             inputVals.a1 = (int)(((lab[2] & 0xFF)*100.0)/255.0);
         }
 //        System.out.println("d0: " + String.valueOf(inputVals.d0));
-//        System.out.println("a0: " + String.valueOf(inputVals.a0));
-//        System.out.println("a1: " + String.valueOf(inputVals.a1));
+        System.out.println("a0: " + String.valueOf(inputVals.a0));
+        System.out.println("a1: " + String.valueOf(inputVals.a1));
     }
     
 //    private int[] appendBuffer(int[] buffer1, int buffer2) {
@@ -235,7 +236,7 @@ public class ScratchArduino {
 //            System.out.print(" ");
         }
 //        System.out.println();
-        serialPort.writeBytes(lab);
+        moSerialPort.writeBytes(lab);
     }
 
 //    public int analogRead(int pin) {

@@ -9,6 +9,8 @@ package scratch2littlebits;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -109,7 +111,9 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
         lblConexion = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox();
+        jPanel1 = new javax.swing.JPanel();
         lblLittleBits = new javax.swing.JLabel();
+        btnReAbrir = new javax.swing.JButton();
         lblScratch = new javax.swing.JLabel();
         lblAndroid = new javax.swing.JLabel();
 
@@ -151,20 +155,50 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
         getContentPane().add(jComboBox1, gridBagConstraints);
 
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
         lblLittleBits.setBackground(new java.awt.Color(255, 204, 204));
         lblLittleBits.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblLittleBits.setText(" ");
         lblLittleBits.setOpaque(true);
+        lblLittleBits.setPreferredSize(new java.awt.Dimension(4, 25));
+        lblLittleBits.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblLittleBitsMouseClicked(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        jPanel1.add(lblLittleBits, gridBagConstraints);
+
+        btnReAbrir.setText("R");
+        btnReAbrir.setMaximumSize(new java.awt.Dimension(25, 25));
+        btnReAbrir.setMinimumSize(new java.awt.Dimension(25, 25));
+        btnReAbrir.setPreferredSize(new java.awt.Dimension(25, 25));
+        btnReAbrir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReAbrirActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        jPanel1.add(btnReAbrir, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
-        getContentPane().add(lblLittleBits, gridBagConstraints);
+        getContentPane().add(jPanel1, gridBagConstraints);
 
         lblScratch.setBackground(new java.awt.Color(255, 204, 51));
         lblScratch.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblScratch.setText(" ");
+        lblScratch.setMaximumSize(new java.awt.Dimension(4, 25));
+        lblScratch.setMinimumSize(new java.awt.Dimension(4, 25));
         lblScratch.setOpaque(true);
+        lblScratch.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -174,7 +208,10 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
         lblAndroid.setBackground(new java.awt.Color(0, 255, 51));
         lblAndroid.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblAndroid.setText(" ");
+        lblAndroid.setMaximumSize(new java.awt.Dimension(4, 25));
+        lblAndroid.setMinimumSize(new java.awt.Dimension(4, 25));
         lblAndroid.setOpaque(true);
+        lblAndroid.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -189,7 +226,11 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBox1MouseClicked
 
     private void jComboBox1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jComboBox1FocusGained
-        recargarPuertos();
+        try {
+            recargarPuertos();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }//GEN-LAST:event_jComboBox1FocusGained
 
     private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox1ItemStateChanged
@@ -204,6 +245,20 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_jComboBox1ItemStateChanged
+
+    private void btnReAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReAbrirActionPerformed
+        try {
+            recargarPuertos();
+            moArduino.closePort();
+            moArduino.openPort();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }         
+    }//GEN-LAST:event_btnReAbrirActionPerformed
+
+    private void lblLittleBitsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLittleBitsMouseClicked
+        btnReAbrirActionPerformed(null);
+    }//GEN-LAST:event_lblLittleBitsMouseClicked
 
     private void recargarPuertos(){
         String[] lasLista = ScratchArduino.getListaPuertos();
@@ -260,8 +315,10 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnReAbrir;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblAndroid;
     private javax.swing.JLabel lblConexion;
     private javax.swing.JLabel lblLittleBits;
