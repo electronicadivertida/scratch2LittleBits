@@ -2,5 +2,5 @@
 package com.electDiver.littleBits.scratch2;
 
 public final class BuildConfig {
-    public final static boolean DEBUG = false;
+    public final static boolean DEBUG = true;
 }
