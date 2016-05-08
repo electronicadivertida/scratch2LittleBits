@@ -26,7 +26,8 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     private Thread moThrHTTPAndroid;
     private final Timer moTimer;
     private boolean mbConectados = false;
-
+    private boolean mbDesactivarEvent  = false;
+    private boolean mbClick=false;
     /**
      * Creates new form Scratch2LittleBits
      */
@@ -42,6 +43,7 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
                             lblLittleBits.setText("LittleBits Conectado");
                         }else{
                             lblLittleBits.setText("LittleBits DESCONECTADO");
+                            recargarPuertos();
                         }
                         if(moHTTP!=null && moHTTP.isConectado()){
                             lblScratch.setText("Scratch Conectado");
@@ -220,7 +222,7 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBox1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jComboBox1MouseClicked
-        
+        mbClick = true;
     }//GEN-LAST:event_jComboBox1MouseClicked
 
     private void jComboBox1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jComboBox1FocusGained
@@ -232,7 +234,8 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBox1FocusGained
 
     private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox1ItemStateChanged
-        if(moArduino!=null && jComboBox1.getSelectedItem()!=null){
+        if(moArduino!=null && jComboBox1.getSelectedItem()!=null && !mbDesactivarEvent && mbClick){
+            mbClick=false;
             if(!jComboBox1.getSelectedItem().toString().equals(moArduino.getPuerto())){
                 try {
                     moArduino.setPuerto(jComboBox1.getSelectedItem().toString());
@@ -259,12 +262,19 @@ public class Scratch2LittleBits extends javax.swing.JFrame {
     }//GEN-LAST:event_lblLittleBitsMouseClicked
 
     private void recargarPuertos(){
-        String[] lasLista = ScratchArduino.getListaPuertos();
-        jComboBox1.removeAllItems();
-        for(int i = 0 ; i < lasLista.length; i++){
-            jComboBox1.addItem(lasLista[i]);
+        if(moArduino!=null){
+            mbDesactivarEvent  = true;
+            try{
+                String[] lasLista = moArduino.getListaPuertos();
+                jComboBox1.removeAllItems();
+                for (String lasLista1 : lasLista) {
+                    jComboBox1.addItem(lasLista1);
+                }
+                jComboBox1.setSelectedIndex(lasLista.length-1);
+            }finally{
+                mbDesactivarEvent  = false;
+            }
         }
-        jComboBox1.setSelectedIndex(lasLista.length-1);
     }
     /**
      * @param args the command line arguments
